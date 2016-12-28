@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/vp_tab_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            app:tabTextAppearance="@style/TabLayoutTextStyle"
+            app:tabIndicatorHeight="4dp"
+            app:tabIndicatorColor="@color/tabIndicatorColor"
+            app:tabSelectedTextColor="@color/tabSelectedTextColor"
+            app:tabTextColor="@color/tabTextColor"
+            />
+
+        <View
+            android:layout_marginTop="-0.5dp"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#dedede"/>
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/vp_tab_pager"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            />
+    </LinearLayout>
+    <include
+        layout="@layout/shop_cart"/>
+</RelativeLayout>

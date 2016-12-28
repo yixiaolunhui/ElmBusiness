@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/goods_category_list_bg_normal"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/goodsCategoryName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
+        android:layout_marginRight="20dp"
+        android:text="水果"
+        android:textSize="14sp"
+        android:textColor="#666666"/>
+
+    <TextView
+        android:id="@+id/shopCartNum"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:background="@drawable/shopcart_num_bg"
+        android:padding="2dp"
+        android:text="12"
+        android:gravity="center"
+        android:visibility="visible"
+        android:textColor="@color/white"
+        android:layout_margin="10dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="18dp"
+        android:textSize="8sp"/>
+
+
+</RelativeLayout>

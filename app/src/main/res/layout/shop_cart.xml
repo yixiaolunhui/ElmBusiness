@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:background="@color/shop_cart_bg"
+    android:id="@+id/shopCartMain"
+    android:clipChildren="false"
+    android:orientation="horizontal"
+    android:paddingLeft="10dp">
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@mipmap/icon_cart"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="15dp"
+        android:layout_centerVertical="true"
+        android:clipChildren="true"
+        />
+
+    <TextView
+        android:id="@+id/shopCartNum"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="7dp"
+        android:background="@drawable/shopcart_num_bg"
+        android:padding="2dp"
+        android:text=""
+        android:gravity="center"
+        android:visibility="gone"
+        android:textColor="@color/white"
+        android:textSize="11sp"/>
+
+
+    <TextView
+        android:id="@+id/totalPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="15dp"
+        android:layout_toRightOf="@id/image"
+        android:text="¥0"
+        android:visibility="gone"
+        android:textColor="@color/white"
+        android:textSize="26sp"
+        android:textStyle="bold"/>
+
+
+    <TextView
+        android:id="@+id/noShop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="15dp"
+        android:layout_toRightOf="@id/image"
+        android:text="购物车为空"
+        android:textColor="#999999"
+        android:textSize="14sp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/howMoneyToDelivery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="10dp"
+        android:text="¥20起送"
+        android:textColor="#999999"
+        android:textSize="18sp"/>
+
+    <TextView
+        android:id="@+id/goTOCheckOut"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:background="#58D178"
+        android:paddingBottom="15dp"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp"
+        android:paddingTop="15dp"
+        android:text="去结算"
+        android:visibility="gone"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        />
+</RelativeLayout>

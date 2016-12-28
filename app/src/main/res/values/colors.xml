@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+
+    <color name="tabIndicatorColor">#3F51B5</color>
+    <color name="tabSelectedTextColor">#3F51B5</color>
+    <color name="tabTextColor">#000000</color>
+    <color name="goods_category_bg">#F2F2F2</color>
+    <color name="color_divider">#D2D2D2</color>
+    <color name="color_666">#666666</color>
+    <color name="color_333">#333333</color>
+    <color name="color_999">#999999</color>
+    <color name="color_d2">#D2D2D2</color>
+    <color name="color_red">#ff0000</color>
+    <color name="goods_category_dirver">#FF8A17</color>
+    <color name="white">#ffffff</color>
+    <color name="shop_cart_bg">#aa000000</color>
+</resources>
