@@ -1,19 +1,25 @@
 package com.dalong.elmbusiness.ui.fragment;
 
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.dalong.elmbusiness.entity.GoodsListBean;
 import com.dalong.elmbusiness.R;
-import com.dalong.elmbusiness.adapter.GoodsCategoryListAdapter;
-import com.dalong.elmbusiness.adapter.GoodsListAdapter;
+import com.dalong.elmbusiness.adapter.BigramHeaderAdapter;
+import com.dalong.elmbusiness.adapter.PersonAdapter;
+import com.dalong.elmbusiness.adapter.RecycleGoodsCategoryListAdapter;
+import com.dalong.elmbusiness.entity.GoodsListBean;
 import com.dalong.elmbusiness.event.GoodsListEvent;
 import com.dalong.elmbusiness.utils.DataUtils;
+import com.eowise.recyclerview.stickyheaders.OnHeaderClickListener;
+import com.eowise.recyclerview.stickyheaders.StickyHeadersBuilder;
+import com.eowise.recyclerview.stickyheaders.StickyHeadersItemDecoration;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -21,46 +27,41 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
-
-import static com.dalong.elmbusiness.R.id.goodsList;
-
 
 /**
  * 商品
  */
-public class GoodsFragment extends BaseFragment implements StickyListHeadersListView.OnHeaderClickListener, StickyListHeadersListView.OnStickyHeaderChangedListener, StickyListHeadersListView.OnStickyHeaderOffsetChangedListener, GoodsListAdapter.OnShopCartGoodsChangeListener {
+public class GoodsFragment extends BaseFragment implements PersonAdapter.OnShopCartGoodsChangeListener, OnHeaderClickListener {
 
 
-    private ListView mGoodsCateGoryList;
-    private StickyListHeadersListView mGoodsList;
-    private GoodsCategoryListAdapter mGoodsCategoryListAdapter;
+    private RecyclerView mGoodsCateGoryList;
+    private RecycleGoodsCategoryListAdapter mGoodsCategoryListAdapter;
     //商品类别列表
-    private List<GoodsListBean.DataEntity.GoodscatrgoryEntity> goodscatrgoryEntities;
+    private List<GoodsListBean.DataEntity.GoodscatrgoryEntity> goodscatrgoryEntities=new ArrayList<>();
     //商品列表
-    private List<GoodsListBean.DataEntity.GoodscatrgoryEntity.GoodsitemEntity> goodsitemEntities;
+    private List<GoodsListBean.DataEntity.GoodscatrgoryEntity.GoodsitemEntity> goodsitemEntities=new ArrayList<>();
 
     //存储含有标题的第一个含有商品类别名称的条目的下表
     private List<Integer> titlePois = new ArrayList<>();
-    private GoodsListAdapter mGoodsListAdapter;
-    private MyOnGoodsScrollListener myOnGoodsScrollListener;
     //上一个标题的小标
     private int lastTitlePoi;
+    private RecyclerView recyclerView;
+    private PersonAdapter personAdapter;
+    private StickyHeadersItemDecoration top;
+    private BigramHeaderAdapter headerAdapter;
+    private LinearLayoutManager mLinearLayoutManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view=inflater.inflate(R.layout.fragment_goods, container, false);
         initView(view);
-        initListener();
         initData();
         return view;
     }
 
     private void initData() {
-        goodscatrgoryEntities = new ArrayList<>();
-        goodsitemEntities = new ArrayList<>();
-        GoodsListBean dataList=  DataUtils.GsonToBean(DataUtils.data,GoodsListBean.class);
+        GoodsListBean dataList = DataUtils.GsonToBean(DataUtils.data, GoodsListBean.class);
         int i = 0;
         int j = 0;
         boolean isFirst;
@@ -81,58 +82,68 @@ public class GoodsFragment extends BaseFragment implements StickyListHeadersList
             i++;
         }
 
-        mGoodsCategoryListAdapter = new GoodsCategoryListAdapter(goodscatrgoryEntities, getActivity());
+        mGoodsCategoryListAdapter = new RecycleGoodsCategoryListAdapter(goodscatrgoryEntities, getActivity());
+        mGoodsCateGoryList.setLayoutManager(new LinearLayoutManager(getContext()));
         mGoodsCateGoryList.setAdapter(mGoodsCategoryListAdapter);
+        mGoodsCategoryListAdapter.setOnItemClickListener(new RecycleGoodsCategoryListAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                recyclerView.scrollToPosition(titlePois.get(position)+position+2);
+                mGoodsCategoryListAdapter.setCheckPosition(position);
+            }
+        });
 
-        mGoodsListAdapter = new GoodsListAdapter(goodsitemEntities, getActivity(), goodscatrgoryEntities);
-        mGoodsListAdapter.setmActivity(getActivity());
-        mGoodsList.setAdapter(mGoodsListAdapter);
-        mGoodsListAdapter.setOnShopCartGoodsChangeListener(this);
-        myOnGoodsScrollListener = new MyOnGoodsScrollListener();
-        mGoodsList.setOnScrollListener(myOnGoodsScrollListener);
+        mLinearLayoutManager =new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        recyclerView.setLayoutManager(mLinearLayoutManager);
+        personAdapter = new PersonAdapter(getActivity(),goodsitemEntities,goodscatrgoryEntities);
+        personAdapter.setmActivity(getActivity());
+        headerAdapter=new BigramHeaderAdapter(getActivity(),goodsitemEntities,goodscatrgoryEntities);
+        top = new StickyHeadersBuilder()
+                .setAdapter(personAdapter)
+                .setRecyclerView(recyclerView)
+                .setStickyHeadersAdapter(headerAdapter)
+                .setOnHeaderClickListener(this)
+                .build();
+        recyclerView.addItemDecoration(top);
+        recyclerView.setAdapter(personAdapter);
+        recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                for (int i=0;i<titlePois.size();i++){
+                    if(mLinearLayoutManager.findFirstVisibleItemPosition()>= titlePois.get(i)){
+                        mGoodsCategoryListAdapter.setCheckPosition(i);
+                    }
+                }
+
+            }
+        });
+
+
+
     }
 
 
     private void initView(View view) {
-        mGoodsCateGoryList = (ListView)view.findViewById(R.id.goods_category_list);
-        mGoodsList = (StickyListHeadersListView)view.findViewById(goodsList);
+        mGoodsCateGoryList = (RecyclerView)view.findViewById(R.id.goods_category_list);
+        recyclerView = (RecyclerView) view.findViewById(R.id.goods_recycleView);
     }
 
-
-    private void initListener() {
-        mGoodsList.setOnHeaderClickListener(this);
-        mGoodsList.setOnStickyHeaderChangedListener(this);
-        mGoodsList.setOnStickyHeaderOffsetChangedListener(this);
-        mGoodsList.setDrawingListUnderStickyHeader(true);
-        mGoodsList.setAreHeadersSticky(true);
-        mGoodsCateGoryList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mGoodsList.setSelection(titlePois.get(position));
-            }
-        });
-    }
-
-
-
-    @Override
-    public void onHeaderClick(StickyListHeadersListView l, View header, int itemPosition, long headerId, boolean currentlySticky) {
-
-    }
-
-    @Override
-    public void onStickyHeaderChanged(StickyListHeadersListView l, View header, int itemPosition, long headerId) {
-
-    }
-
-    @Override
-    public void onStickyHeaderOffsetChanged(StickyListHeadersListView l, View header, int offset) {
-
-    }
 
     @Override
     public void onNumChange() {
 
+    }
+
+    @Override
+    public void onHeaderClick(View header, long headerId) {
+        TextView text = (TextView)header.findViewById(R.id.tvGoodsItemTitle);
+        Toast.makeText(getActivity(), "Click on " + text.getText(), Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -176,5 +187,7 @@ public class GoodsFragment extends BaseFragment implements StickyListHeadersList
         }
 
     }
+
+
 
 }

@@ -1,13 +1,17 @@
 package com.dalong.elmbusiness.ui;
 
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -17,12 +21,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.dalong.elmbusiness.utils.AnimationUtil;
-import com.dalong.elmbusiness.ui.fragment.EvaluateFragment;
-import com.dalong.elmbusiness.ui.fragment.GoodsFragment;
+import com.dalong.elmbusiness.BaseActivity;
 import com.dalong.elmbusiness.R;
 import com.dalong.elmbusiness.adapter.TabFragmentAdapter;
 import com.dalong.elmbusiness.event.MessageEvent;
+import com.dalong.elmbusiness.ui.fragment.EvaluateFragment;
+import com.dalong.elmbusiness.ui.fragment.GoodsFragment;
+import com.dalong.elmbusiness.utils.AnimationUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -31,14 +36,15 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TabActivity extends AppCompatActivity {
-
-    private ViewPager mViewPager;
-    private TabLayout mTabLayout;
+public class NewTabActivity extends BaseActivity {
+    private CollapsingToolbarLayout collapsingToolbarLayout;
+    private AppBarLayout appBarLayout;
+    private TabLayout slidingTabLayout;
     //fragment列表
     private List<Fragment> mFragments=new ArrayList<>();
     //tab名的列表
     private List<String> mTitles=new ArrayList<>();
+    private ViewPager viewPager;
     private TabFragmentAdapter adapter;
     private TextView shopCartNum;
     private TextView totalPrice;
@@ -48,29 +54,24 @@ public class TabActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tab);
+        setContentView(R.layout.activity_new_tab);
+
+        setCollsapsing();
         initView();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        EventBus.getDefault().unregister(this);
+        setViewPager();
     }
 
     private void initView() {
-        mViewPager=(ViewPager)findViewById(R.id.vp_tab_pager);
-        mTabLayout=(TabLayout)findViewById(R.id.vp_tab_title);
+        appBarLayout = (AppBarLayout) findViewById(R.id.appbar);
+        slidingTabLayout = (TabLayout) findViewById(R.id.slidinglayout);
+        viewPager = (ViewPager) findViewById(R.id.vp);
         shopCartMain=(RelativeLayout)findViewById(R.id.shopCartMain);
         shopCartNum=(TextView)findViewById(R.id.shopCartNum);
         totalPrice=(TextView)findViewById(R.id.totalPrice);
         noShop=(TextView)findViewById(R.id.noShop);
+    }
+
+    private void setViewPager() {
 
         GoodsFragment goodsFragment=new GoodsFragment();
         EvaluateFragment evaluateFragment=new EvaluateFragment();
@@ -81,10 +82,9 @@ public class TabActivity extends AppCompatActivity {
         mTitles.add("评价");
 
         adapter=new TabFragmentAdapter(getSupportFragmentManager(),mFragments,mTitles);
-        mViewPager.setAdapter(adapter);
-        mTabLayout.setupWithViewPager(mViewPager);
-
-        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        viewPager.setAdapter(adapter);
+        slidingTabLayout.setupWithViewPager(viewPager);
+        viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
@@ -95,11 +95,11 @@ public class TabActivity extends AppCompatActivity {
                 switch (position){
                     case 0:
                         shopCartMain.startAnimation(
-                                AnimationUtil.createInAnimation(TabActivity.this, shopCartMain.getMeasuredHeight()));
+                                AnimationUtil.createInAnimation(NewTabActivity.this, shopCartMain.getMeasuredHeight()));
                         break;
                     case 1:
                         shopCartMain.startAnimation(
-                                AnimationUtil.createOutAnimation(TabActivity.this, shopCartMain.getMeasuredHeight()));
+                                AnimationUtil.createOutAnimation(NewTabActivity.this, shopCartMain.getMeasuredHeight()));
                         break;
                 }
 
@@ -113,23 +113,49 @@ public class TabActivity extends AppCompatActivity {
     }
 
 
+    private void setCollsapsing() {
+        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing);
+        collapsingToolbarLayout.setStatusBarScrimColor(getResources().getColor(R.color.touming));
+        collapsingToolbarLayout.setContentScrim(getResources().getDrawable(R.mipmap.background));
+    }
+
+
+    @Override protected void setStatusBar() {
+        super.setStatusBar();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+        } else {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
+    }
+
+
+
+
     /**
      * 添加 或者  删除  商品发送的消息处理
      * @param event
      */
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(MessageEvent event) {
-        if(event.num>0){
-            shopCartNum.setText(String.valueOf(event.num));
-            shopCartNum.setVisibility(View.VISIBLE);
-            totalPrice.setVisibility(View.VISIBLE);
-            noShop.setVisibility(View.GONE);
-        }else{
-            shopCartNum.setVisibility(View.GONE);
-            totalPrice.setVisibility(View.GONE);
-            noShop.setVisibility(View.VISIBLE);
+        if(event!=null){
+            if(event.num>0){
+                shopCartNum.setText(String.valueOf(event.num));
+                shopCartNum.setVisibility(View.VISIBLE);
+                totalPrice.setVisibility(View.VISIBLE);
+                noShop.setVisibility(View.GONE);
+            }else{
+                shopCartNum.setVisibility(View.GONE);
+                totalPrice.setVisibility(View.GONE);
+                noShop.setVisibility(View.VISIBLE);
+            }
+            totalPrice.setText("¥"+String.valueOf(event.price));
+
+            Log.v("NewTabActivity","添加的数量："+event.goods.size());
         }
-        totalPrice.setText("¥"+String.valueOf(event.price));
+
     }
 
 
@@ -221,5 +247,18 @@ public class TabActivity extends AppCompatActivity {
         lp.topMargin = y;
         view.setLayoutParams(lp);
         return view;
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 }
